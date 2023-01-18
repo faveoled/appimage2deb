@@ -1,0 +1,11 @@
+[Desktop Entry]
+X-AppImage-Arch=x86_64
+X-AppImage-Version=latest
+X-AppImage-Name=App Name
+Name=App name
+Exec=/opt/appimage2deb/AppRun
+Icon=appimage2deb
+Type=Application
+Terminal=false
+Categories=Utility;
+Comment=
