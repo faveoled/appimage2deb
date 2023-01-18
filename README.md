@@ -5,7 +5,7 @@ A CLI utility for converting AppImage files to deb packages
 
 
 
-# Build
+# Production Build
 ```
 sbt fullOptJS
 ```
