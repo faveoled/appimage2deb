@@ -107,6 +107,7 @@ object TutorialApp {
     val offset = findOffset(appImagePath)
     extractAppImage(offset, unpackDir, appImagePath)
 
+    val debTmp = Node.makeTmpDir()
     val debSrc = Node.makeTmpDir()
     Node.makeDir(node_path.resolve(debSrc, "opt"))
     Node.makeDir(node_path.resolve(debSrc, "usr/share/applications"))
@@ -173,7 +174,15 @@ object TutorialApp {
     Node.chmod(node_path.resolve(debianControlDir, "postinst"), rights775)
     Node.chmod(node_path.resolve(debianControlDir, "postrm"), rights775)
 
-    runProcess(s"fakeroot dpkg-deb -b \"${debSrc}\" \"${appImageDirPath}/${pkgName}.deb\"", "Building deb package")
+    runProcess(s"tar -czf \"${debTmp}/control.tar.gz\" --owner=root --group=root -C \"${debianControlDir}\" .", "Compressing control.tar.gz")
+    runProcess(s"tar -czf \"${debTmp}/data.tar.gz\" --exclude='./DEBIAN' --owner=root --group=root -C \"${debSrc}\" .", "Compressing data.tar.gz")
+    Node.writeFile(node_path.resolve(debTmp, "debian-binary"), "2.0\n")
+
+    runProcess(s"ar rcs \"${appImageDirPath}/${pkgName}.deb\" \"${debTmp}/debian-binary\" \"${debTmp}/control.tar.gz\" \"${debTmp}/data.tar.gz\"", "Building deb package")
+
+    runProcessSilent(s"rm -rf \"${debTmp}\"")
+    runProcessSilent(s"rm -rf \"${debSrc}\"")
+    runProcessSilent(s"rm -rf \"${unpackDir}\"")
 
     println(s"Result package has been written to ${appImageDirPath}/${pkgName}.deb")
 
@@ -218,11 +227,13 @@ object TutorialApp {
   def runProcess(command: String, details: String = ""): String =
     val msg = if (details == "") then s"Running command `${command}`" else s"${details}"
     println(s"${msg}...")
-    val options = ExecSyncOptionsWithStringEncoding(BufferEncoding.utf8)
-    val output = node_child_process.execSync(command, options)
+    val output = runProcessSilent(command)
     println(s"Done: ${details}")
     output
 
+  def runProcessSilent(command: String): String =
+    val options = ExecSyncOptionsWithStringEncoding(BufferEncoding.utf8)
+    node_child_process.execSync(command, options)
 
   def findOffset(filePath: String): Int =
     val output = runProcess(s"readelf -h ${filePath}", "Reading source AppImage")

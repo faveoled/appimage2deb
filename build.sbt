@@ -1,4 +1,4 @@
-ThisBuild / scalaVersion := "3.2.1"
+ThisBuild / scalaVersion := "3.3.9"
 
 lazy val hello = (project in file("."))
   .enablePlugins(ScalaJSPlugin, ScalablyTypedConverterPlugin)

@@ -11,7 +11,7 @@ object Node {
 
   def readFile(filePath: String): String =
     val opts = BufferEncoding.utf8
-    val read = node_fs.readFileSync(filePath, opts)
+    val read = node_fs.readFileSync(filePath, opts).asInstanceOf[String]
     read
 
   def writeFile(filePath: String, contents: String): Unit =
@@ -38,7 +38,7 @@ object Node {
   def makeTmpDir(): String =
     try {
       val tmpDir = node_fs.mkdtempSync(node_path.join(node_os.tmpdir(), "appimage2deb-"));
-      tmpDir
+      tmpDir.asInstanceOf[String]
     } catch {
       case e: Exception =>
         throw Exception(s"Couldn't create a new temporary directory", e)
@@ -91,7 +91,7 @@ object Node {
 
   def appIconInDir(dirPath: String): Option[String] =
     try {
-      val linkVal = node_fs.readlinkSync(node_path.resolve(dirPath, ".DirIcon"))
+      val linkVal = node_fs.readlinkSync(node_path.resolve(dirPath, ".DirIcon")).asInstanceOf[String]
       Some(node_path.resolve(dirPath, linkVal))
     } catch {
       case e: Exception =>
